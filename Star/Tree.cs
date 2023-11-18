@@ -67,15 +67,13 @@ namespace Star
     public class Tree
     {
         private readonly int _fanout;
-        private readonly float _size;
         private readonly float _cellSize;
         private readonly float _elementSize;
         private List<Layer> _layers = new();
         
-        public Tree(int layers, int fanout, float size)
+        public Tree(int layers, int fanout)
         {
             _fanout = fanout;
-            _size = size;
             _cellSize = 1.0f / (float)Math.Pow(fanout, layers - 1);
             _elementSize = 1.0f / (float)Math.Pow(fanout, layers);
 
