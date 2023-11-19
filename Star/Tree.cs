@@ -5,7 +5,7 @@ using System.Linq;
 
 namespace Star
 {
-    internal struct Element
+    public struct Element
     {
         public float _mass;
         public Vector3 _position;
@@ -67,15 +67,33 @@ namespace Star
     public class Tree
     {
         private readonly int _fanout;
-        private readonly float _cellSize;
-        private readonly float _elementSize;
         private List<Layer> _layers = new();
-        
+
+        public Element GetElement(int x, int y, int z, int layer)
+        {
+            return _layers[layer].
+                Blocks[x / _fanout, y / _fanout, z / _fanout].
+                Elements[x % _fanout, y % _fanout, z % _fanout];
+        }
+
+        internal IEnumerable<Element> UpperCells
+        {
+            get
+            {
+                var layer = _layers.First();
+
+                for(int i = 0; i < _fanout; i++)
+                    for (int j = 0; j < _fanout; j++)
+                        for (int k = 0; k < _fanout; k++)
+                        {
+                            yield return layer.Blocks[0,0, 0].Elements[i, j, k];
+                        }
+            }
+        }
+
         public Tree(int layers, int fanout)
         {
             _fanout = fanout;
-            _cellSize = 1.0f / (float)Math.Pow(fanout, layers - 1);
-            _elementSize = 1.0f / (float)Math.Pow(fanout, layers);
 
             for (int l = 0; l < layers; l++)
             {
@@ -143,13 +161,28 @@ namespace Star
             var size = particles.Select(
                 p => MathF.Max(MathF.Max(MathF.Abs(p.Position.X), MathF.Abs(p.Position.Y)), MathF.Abs(p.Position.Z))).
                 Max()
-                * 2.05f;
+                * 2.01f;
+
+            var min = new Vector3(float.MaxValue);
+            var max = new Vector3(float.MinValue);
+            foreach (var particle in particles)
+            {
+                min = new Vector3(MathF.Min(min.X, particle.Position.X), MathF.Min(min.Y, particle.Position.Y), MathF.Min(min.Z, particle.Position.Z));
+                max = new Vector3(MathF.Max(max.X, particle.Position.X), MathF.Max(max.Y, particle.Position.Y), MathF.Max(max.Z, particle.Position.Z));
+            }
+
+            min *= 0.999f;
+            max *= 1.001f;
+            var range = max - min;
+
+            var normalisedBlockSize = 1.0f / lowestLayer.Blocks.GetLength(0);
+            var normalisedElementSize = 1.0f / (lowestLayer.Blocks.GetLength(0) * _fanout);
 
             foreach (var particle in particles)
             {
-                var normalised = (particle.Position + new Vector3(size / 2.05f)) / size;
-                var index = normalised / _cellSize;
-                var elmIndex = normalised / _elementSize;
+                var normalised = (particle.Position - min) / range;
+                var index = normalised / normalisedBlockSize;
+                var elmIndex = normalised / normalisedElementSize;
 
                 var block = lowestLayer.Blocks[(int)index.X, (int)index.Y, (int)index.Z];
 
