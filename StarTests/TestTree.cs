@@ -10,8 +10,8 @@ namespace StarTests
         [TestMethod]
         public void EvenDistributionReportedAtTopLevel()
         {
-            var fanout = 4;
-            var tree = new Tree(3, fanout);
+            var fanout = 2;
+            var tree = new Tree(1, fanout);
             var particles = new List<Particle>();
 
             for (int i = 0; i < 200; i++)

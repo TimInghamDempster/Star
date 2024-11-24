@@ -9,7 +9,7 @@ namespace Star
     {
         const float _diameterInLightyears = 100.0f;
         const float _radiusInLightyears = _diameterInLightyears / 2.0f;
-        const int _particleCount = 1000;
+        const int _particleCount = 50000;
         private readonly float _screenHeight;
         const float _initialParticleSpeed = 0.00f;
 
